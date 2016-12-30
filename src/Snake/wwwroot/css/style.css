@@ -1,0 +1,58 @@
+﻿html {
+}
+
+body {
+    height: 100%;
+    width: 100%;
+}
+
+div#game_wrapper {
+    position: absolute;
+    top: 150px;
+    width: 90%;
+    height: 300px;
+    background-color: #efefef;
+}
+
+.cell {
+    position: absolute;
+    height: 20px;
+    width: 20px;
+    background: #ffd800;
+    text-align: center;
+    line-height: 20px;
+    z-index: 2;
+}
+
+.food {
+    background-color: #0094ff;
+    border-radius: 1em;
+}
+
+.head {
+    background-color: #4800ff;
+}
+
+.wall {
+    background-color: #808080;
+}
+
+.body {
+    background-color: #ffd800;
+}
+
+.tail {
+    border-radius: 1em 0 0 1em;
+    border-top: 1px solid #e4ca3d;
+    border-bottom: 1px solid #e4ca3d;
+    border-left: 1px solid #e4ca3d;
+}
+
+.gulp {
+    z-index: 3;
+    border: 1px dashed #0094ff;
+    background: none;
+    border-radius: 1em;
+    transform: scale(0.8) !important;
+    color: transparent;
+}
