@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "noEmitOnError": true,
+    "noImplicitAny": false,
+    "outDir": "wwwroot/js",
+    "rootDir": "Scripts",
+    "sourceMap": false,
+    "target": "es6",
+    "module": "es6",
+    "allowJs": false
+  },
+  "exclude": [
+    "node_modules",
+    "wwwroot"
+  ]
+}
