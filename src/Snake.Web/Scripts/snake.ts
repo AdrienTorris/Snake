@@ -136,9 +136,7 @@ class Game {
         let x = Utils.rand(GAME_WRAPPER_LEFT, GAME_WRAPPER_WIDTH, SIZE);
         let y = Utils.rand(GAME_WRAPPER_TOP, GAME_WRAPPER_HEIGHT, SIZE);
 
-        // If random spot is already filled, pick a new one
-        // Pick until you find an empty spot
-        // ..... nothing can go wrong with this
+        // If random spot is already filled, pick a new one to avoid conflicts
         if (Locations.has(x, y)) {
             [x, y] = this.getFoodLocation();
         }
@@ -151,27 +149,22 @@ class Game {
             let [foodX, foodY] = this.getFoodLocation();
             this.food = new Piece(this.gameWrapper, foodX, foodY, "food");
         }
-
-        // if head and food collided, replace head with the food
-        // set the correct type for each piece
+        
         if (this.head.x === this.food.x && this.head.y === this.food.y) {
-            this.food.next = this.head; // put food at the top of the chain
-            this.food.direction = this.head.direction; // Needs to go to same direction where head was going
-            this.head.setType("body");  // head is not body
-            this.food.setType("head");  // food is now head
-            this.head = this.food;  // Update the Game instance with new head
-            this.food = null;       // food is gone now
+            this.food.next = this.head;
+            this.food.direction = this.head.direction;
+            this.head.setType("body");
+            this.food.setType("head");
+            this.head = this.food;
+            this.food = null;
 
             this.length++;
 
-            this.updateScore();     // Calculate the new score
-            this.showScore();       // Update the score
+            this.updateScore();
+            this.showScore();
         }
     }
-
-    /**
-     * Don"t let snake to go backwards
-     */
+    
     notBackwards(key: number): boolean {
         let lastDirection = Directions.peek();
 
@@ -188,7 +181,6 @@ class Game {
 
         document.addEventListener("keydown", (e: KeyboardEvent) => {
             switch (e.keyCode) {
-                // Arrow keys or nothing
                 default:
                     if (e.keyCode in keys && this.notBackwards(e.keyCode)) {
                         Directions.set(e.keyCode);
@@ -204,10 +196,7 @@ class Game {
             }
         });
     }
-
-    /**
-     * GAME OVER
-     */
+    
     over(): void {
         this.moving = false;
         let el = <HTMLDivElement>document.querySelector(".score");
@@ -222,13 +211,11 @@ class Game {
                 requestAnimationFrame(this.frame.bind(this));
             }, this.getSpeed());
         }
-
-        // If head hits an occupied space, GAME OVER
+        
         if (Locations.has(this.head.x, this.head.y)) {
             return this.over();
         }
-
-        // If Game is not over, then move the snake to requested direction
+        
         let direction = Directions.pop();
 
         if (direction === keys.RIGHT) {
@@ -246,9 +233,7 @@ class Game {
         if (direction === keys.UP) {
             this.head.move(this.head.x, this.head.y - SIZE, keys[direction]);
         }
-
-        // Check if we caught caught the food
-        // or we need to place a new food
+        
         this.handleFood();
     }
 
@@ -301,19 +286,11 @@ class Piece {
     }
 
     setPos(x: number, y: number): void {
-        // CSS nove the element
         this.el.style.top = `${y}px`;
         this.el.style.left = `${x}px`;
-
-        // this.el.style.transform = `translate(${x}px, ${y}px)`;
-
-        // reset CSS classnames basically
+        
         this.applyClass();
-
-        // Save the location of this piece to occupied spaces
-        // But don"t do this, if we are the food or head because;
-        // - Head cannot collide with itself
-        // - We want to collide with food :)
+        
         if (this.type !== "head" && this.type !== "food") {
             Locations.set(x, y);
         }
@@ -321,39 +298,25 @@ class Piece {
 
     move(x: number, y: number, direction: string = "RIGHT"): void {
         this.direction = direction;
-        // Move HTML Element to new spot
-        this.setPos(x, y);
 
-        // Save the old direction
+        this.setPos(x, y);
+        
         let tdirection = this.direction;
-        // Set new direction of the piece
         this.direction = direction;
-        // If there is a next piece move it to old position
         if (this.next !== null) {
-            // If this piece is a head piece, immediate piece should receive heads current
-            // direction instead of old one this is needed to have a fluid motion
             this.next.move(this.x, this.y, this.type === "head" ? this.direction : tdirection);
         } else {
-            // We are the last piece, previous position
-            // is now empty, clear it
             Locations.remove(this.x, this.y);
         }
-
-
-        // if I"m part of body and no one is following me
-        // then I must be the tail
+        
         if (this.next === null && this.type === "body") {
             this.el.classList.add("tail");
         }
-
-        // if me and the piece following me are at the same spot
-        // then piece following me must be the food we just swallowed
+        
         if (this.next !== null && this.next.x === x && this.next.y === y) {
             this.next.el.classList.add("gulp");
         }
-
-
-        // store new values
+        
         this.x = x;
         this.y = y;
     }
