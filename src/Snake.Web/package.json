@@ -1,6 +1,18 @@
 {
   "version": "1.0.0",
   "name": "snake",
+  "description": "Basic snake game written in Typescript with Visual Studio 2017 RC, just for fun and curiosity about Typescript and games",
+  "keywords": [
+    "snake",
+    "snake game"
+  ],
+  "homepage": "https://github.com/AdrienTorris/Snake",
+  "bugs": "https://github.com/AdrienTorris/Snake/issues",
+  "author": {
+    "name": "Adrien Torris",
+    "email": "adrientorris@gmail.com",
+    "url": "https://github.com/AdrienTorris"
+  },
   "private": true,
   "devDependencies": {
   },

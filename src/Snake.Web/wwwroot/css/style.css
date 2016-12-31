@@ -26,11 +26,12 @@ div#game_wrapper {
 
 .food {
     background-color: #0094ff;
-    border-radius: 1em;
+    border-radius: 4em;
 }
 
 .head {
-    background-color: #4800ff;
+    background-color: #ff6a00;
+    border-radius: 4em;
 }
 
 .wall {
@@ -39,20 +40,18 @@ div#game_wrapper {
 
 .body {
     background-color: #ffd800;
+    border-radius: 4em;
 }
 
 .tail {
-    border-radius: 1em 0 0 1em;
-    border-top: 1px solid #e4ca3d;
-    border-bottom: 1px solid #e4ca3d;
-    border-left: 1px solid #e4ca3d;
+    opacity: 0.7;
+    border-radius: 4em;
 }
 
 .gulp {
     z-index: 3;
     border: 1px dashed #0094ff;
-    background: none;
-    border-radius: 1em;
-    transform: scale(0.8) !important;
-    color: transparent;
+    background-color: #0094ff;
+    border-radius: 4em;
+    opacity: 0.3;
 }
