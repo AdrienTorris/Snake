@@ -8,9 +8,6 @@ body {
 
 div#game_wrapper {
     position: absolute;
-    top: 150px;
-    width: 90%;
-    height: 300px;
     background-color: #efefef;
 }
 
