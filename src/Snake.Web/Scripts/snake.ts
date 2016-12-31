@@ -1,9 +1,31 @@
-﻿const SIZE = 20;
+﻿/**
+ * Size of elements on the map
+ */
+const SIZE = 20;
+
+/**
+ * Width of the map
+ */
 const GAME_WRAPPER_WIDTH = 600;
+
+/**
+ * Height of the map
+ */
 const GAME_WRAPPER_HEIGHT = 300;
+
+/**
+ * Top margin of the map
+ */
 const GAME_WRAPPER_TOP = 150;
+
+/**
+ * Left margin of the map
+ */
 const GAME_WRAPPER_LEFT = 20;
 
+/**
+* List of keyboard keys the game handle
+*/
 enum keys {
     RETURN = 13,
     SPACE = 32,
@@ -17,8 +39,17 @@ enum keys {
     K = 75
 }
 
+/**
+ * Utility methods to help dealing with some stuff
+ */
 namespace Utils {
 
+    /**
+     * Get a random number
+     * @param min
+     * @param max
+     * @param reduce
+     */
     export function rand(min: number, max: number, reduce: number = SIZE): number {
         let num = Math.floor(Math.random() * (max - min)) + min;
         return num - (num % reduce);
@@ -62,62 +93,105 @@ namespace Directions {
     }
 }
 
+/**
+ * Game
+ */
 class Game {
+
+    /**
+    * Map
+    */
     public gameWrapper: HTMLDivElement;
+
+    /**
+    * User score
+    */
     public score: number = 0;
+
+    /**
+    * The food the snake have to eat
+    */
     public food: Piece;
+
+    /**
+    * Snake's head
+    */
     public head: Piece;
+
+    /**
+    * Snake is moving
+    */
     private moving: boolean = false;
+
     /**
     * Snake body size
     */
     public length: number = 0;
 
+    /**
+     * New instance of the game
+     */
     constructor() {
 
+        // Build the map
         this.gameWrapper = document.getElementById('game_wrapper') as HTMLDivElement;
         this.gameWrapper.style.width = `${GAME_WRAPPER_WIDTH}px`;
         this.gameWrapper.style.height = `${GAME_WRAPPER_HEIGHT}px`;
         this.gameWrapper.style.top = `${GAME_WRAPPER_TOP}px`;
         this.gameWrapper.style.left = `${GAME_WRAPPER_LEFT}px`;
 
+        // Create the snake
         this.head = new Piece(this.gameWrapper, SIZE * 3, SIZE * 3, "head");
 
+        // Create map's walls
         this.addWalls();
+
+        // Create a food to feed the snake with
         this.handleFood();
+
+        // Events the game handles
         this.setEvents();
 
     }
 
+    /**
+     * Add the walls the snake can't hurt
+     */
     addWalls(): void {
-        // mur gauche
+        // left
         for (var _i = 0; _i < GAME_WRAPPER_HEIGHT; _i++) {
             let mur: Piece = new Piece(this.gameWrapper, 0, _i, 'wall');
             _i = _i + SIZE - 1;
         }
-        // mur droit
+        // right
         for (var _i = 0; _i < GAME_WRAPPER_HEIGHT; _i++) {
             let mur: Piece = new Piece(this.gameWrapper, GAME_WRAPPER_WIDTH - SIZE, _i, 'wall');
             _i = _i + SIZE - 1;
         }
-        // mur haut
+        // top
         for (var _i = SIZE; _i < GAME_WRAPPER_WIDTH - SIZE; _i++) {
             let mur: Piece = new Piece(this.gameWrapper, _i, 0, 'wall');
             _i = _i + SIZE - 1;
         }
-        // mur bas
+        // bottom
         for (var _i = SIZE; _i < GAME_WRAPPER_WIDTH - SIZE; _i++) {
             let mur: Piece = new Piece(this.gameWrapper, _i, GAME_WRAPPER_HEIGHT - SIZE, 'wall');
             _i = _i + SIZE - 1;
         }
     }
 
+    /**
+     * Start a game
+     */
     start(): void {
         this.showScore();
         this.moving = true;
         requestAnimationFrame(this.frame.bind(this));
     }
 
+    /**
+     * Display the user score
+     */
     showScore(): void {
         let el = <HTMLDivElement>document.querySelector(".score");
         el.innerHTML = `
@@ -125,6 +199,9 @@ class Game {
         `;
     }
 
+    /**
+     * Calculate the score
+     */
     updateScore(): number {
         return this.score += 1;
     }
@@ -133,6 +210,7 @@ class Game {
      * Get a random empty location for food
      */
     getFoodLocation(): number[] {
+        // Generate random x and y positions
         let x = Utils.rand(GAME_WRAPPER_LEFT, GAME_WRAPPER_WIDTH, SIZE);
         let y = Utils.rand(GAME_WRAPPER_TOP, GAME_WRAPPER_HEIGHT, SIZE);
 
@@ -144,12 +222,18 @@ class Game {
         return [x, y];
     }
 
+    /**
+     * Handle food => Create a new one if there is no food on the map, and manage snake/food collision
+     */
     handleFood(): void {
+
+        // If no food on the map, create a new one, snake have to eat !
         if (this.food == null) {
             let [foodX, foodY] = this.getFoodLocation();
             this.food = new Piece(this.gameWrapper, foodX, foodY, "food");
         }
-        
+
+        // Manage a collision between the snake and a food item
         if (this.head.x === this.food.x && this.head.y === this.food.y) {
             this.food.next = this.head;
             this.food.direction = this.head.direction;
@@ -158,13 +242,19 @@ class Game {
             this.head = this.food;
             this.food = null;
 
+            // Grow up the size of the snake
             this.length++;
 
+            // Update and display new score
             this.updateScore();
             this.showScore();
         }
     }
-    
+
+    /**
+     * Manage the thing that the snake can't move backward
+     * @param key
+     */
     notBackwards(key: number): boolean {
         let lastDirection = Directions.peek();
 
@@ -177,6 +267,9 @@ class Game {
         return true;
     }
 
+    /**
+     * Set events the game handles
+     */
     setEvents(): void {
 
         document.addEventListener("keydown", (e: KeyboardEvent) => {
@@ -189,6 +282,9 @@ class Game {
             }
         });
 
+        /**
+        * User clicked on the start game button
+        */
         document.addEventListener("click", (e: MouseEvent) => {
             let el = <HTMLElement>e.target;
             if (el.id === "start") {
@@ -196,7 +292,10 @@ class Game {
             }
         });
     }
-    
+
+    /**
+     * Game is over
+     */
     over(): void {
         this.moving = false;
         let el = <HTMLDivElement>document.querySelector(".score");
@@ -237,27 +336,55 @@ class Game {
         this.handleFood();
     }
 
+    /**
+     * Get the speed of the game
+     */
     getSpeed(): number {
         return 150;
     }
 }
 
+/**
+ * Handle item locations
+ */
 namespace Locations {
+
+    /**
+     * Filled location collection
+     */
     let data: { [location: string]: boolean } = {};
 
+    /**
+     * Set a new location
+     * @param x
+     * @param y
+     */
     export function set(x: number, y: number): void {
         data[`${x}:${y}`] = true;
     }
 
+    /**
+     * Remove a location
+     * @param x
+     * @param y
+     */
     export function remove(x: number, y: number): void {
         delete data[`${x}:${y}`];
     }
 
+    /**
+     * Check if a location is filled
+     * @param x
+     * @param y
+     */
     export function has(x: number, y: number): boolean {
         return data[`${x}:${y}`] === true;
     }
 }
 
+/**
+ * Game's item
+ */
 class Piece {
     el: HTMLDivElement;
     next: Piece;
@@ -322,4 +449,7 @@ class Piece {
     }
 }
 
+/**
+ * Instanciate a new game
+ */
 let g = new Game();
