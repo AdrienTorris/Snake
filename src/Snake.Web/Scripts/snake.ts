@@ -24,6 +24,16 @@ const GAME_WRAPPER_TOP = 150;
 const GAME_WRAPPER_LEFT = 20;
 
 /**
+ * Speed to add to each level
+ */
+const LEVEL_SPEED_STEP = 30;
+
+/**
+ * Maximum speed
+ */
+const SPEED_LIMIT = 40;
+
+/**
 * List of keyboard keys the game handle
 */
 enum keys {
@@ -129,6 +139,11 @@ class Game {
     public length: number = 0;
 
     /**
+    * Current level of the user
+    */
+    public level: number = 1;
+
+    /**
      * New instance of the game
      */
     constructor() {
@@ -195,14 +210,18 @@ class Game {
     showScore(): void {
         let el = <HTMLDivElement>document.querySelector(".score");
         el.innerHTML = `
-            Score: ${this.score}
+            Score: ${this.score}, Level: ${this.level}, Speed: ${this.getSpeed()}
         `;
     }
 
     /**
-     * Calculate the score
+     * Calculate the score and the level
      */
     updateScore(): number {
+        if (this.score.toString().endsWith('0')){
+            this.level += 1;
+        }
+        
         return this.score += 1;
     }
 
@@ -304,13 +323,17 @@ class Game {
     `;
     }
 
+    /**
+     * Manage the game's animation
+     */
     frame(): void {
         if (this.moving) {
             setTimeout(() => {
                 requestAnimationFrame(this.frame.bind(this));
             }, this.getSpeed());
         }
-        
+
+        // If snake hurts a filled space, the game is over
         if (Locations.has(this.head.x, this.head.y)) {
             return this.over();
         }
@@ -337,10 +360,14 @@ class Game {
     }
 
     /**
-     * Get the speed of the game
+     * Get the speed of the game, depends of the level
      */
     getSpeed(): number {
-        return 150;
+        let speed: number = 190 + (this.level * (LEVEL_SPEED_STEP * -1));
+        if (speed >= SPEED_LIMIT) {
+            return speed;
+        }
+        return SPEED_LIMIT;
     }
 }
 

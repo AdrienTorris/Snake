@@ -19,6 +19,14 @@ const GAME_WRAPPER_TOP = 150;
  */
 const GAME_WRAPPER_LEFT = 20;
 /**
+ * Speed to add to each level
+ */
+const LEVEL_SPEED_STEP = 30;
+/**
+ * Maximum speed
+ */
+const SPEED_LIMIT = 40;
+/**
 * List of keyboard keys the game handle
 */
 var keys;
@@ -106,6 +114,10 @@ class Game {
         * Snake body size
         */
         this.length = 0;
+        /**
+        * Current level of the user
+        */
+        this.level = 1;
         // Build the map
         this.gameWrapper = document.getElementById('game_wrapper');
         this.gameWrapper.style.width = `${GAME_WRAPPER_WIDTH}px`;
@@ -160,13 +172,16 @@ class Game {
     showScore() {
         let el = document.querySelector(".score");
         el.innerHTML = `
-            Score: ${this.score}
+            Score: ${this.score}, Level: ${this.level}, Speed: ${this.getSpeed()}
         `;
     }
     /**
-     * Calculate the score
+     * Calculate the score and the level
      */
     updateScore() {
+        if (this.score.toString().endsWith('0')) {
+            this.level += 1;
+        }
         return this.score += 1;
     }
     /**
@@ -253,12 +268,16 @@ class Game {
       Game over!
     `;
     }
+    /**
+     * Manage the game's animation
+     */
     frame() {
         if (this.moving) {
             setTimeout(() => {
                 requestAnimationFrame(this.frame.bind(this));
             }, this.getSpeed());
         }
+        // If snake hurts a filled space, the game is over
         if (Locations.has(this.head.x, this.head.y)) {
             return this.over();
         }
@@ -278,10 +297,14 @@ class Game {
         this.handleFood();
     }
     /**
-     * Get the speed of the game
+     * Get the speed of the game, depends of the level
      */
     getSpeed() {
-        return 150;
+        let speed = 190 + (this.level * (LEVEL_SPEED_STEP * -1));
+        if (speed >= SPEED_LIMIT) {
+            return speed;
+        }
+        return SPEED_LIMIT;
     }
 }
 /**
