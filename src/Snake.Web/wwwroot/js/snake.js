@@ -163,45 +163,6 @@ class Game {
         }
     }
     /**
-     * Remove walls of the map if user wants to
-     */
-    removeWalls() {
-        // left
-        for (var _i = 0; _i < GAME_WRAPPER_HEIGHT; _i++) {
-            Locations.remove(0, _i);
-            _i = _i + SIZE - 1;
-        }
-        // right
-        for (var _i = 0; _i < GAME_WRAPPER_HEIGHT; _i++) {
-            Locations.remove(GAME_WRAPPER_WIDTH - SIZE, _i);
-            _i = _i + SIZE - 1;
-        }
-        // top
-        for (var _i = SIZE; _i < GAME_WRAPPER_WIDTH - SIZE; _i++) {
-            Locations.remove(_i, 0);
-            _i = _i + SIZE - 1;
-        }
-        // bottom
-        for (var _i = SIZE; _i < GAME_WRAPPER_WIDTH - SIZE; _i++) {
-            Locations.remove(_i, GAME_WRAPPER_HEIGHT - SIZE);
-            _i = _i + SIZE - 1;
-        }
-    }
-    /**
-     * Display or hide walls
-     */
-    manageWalls() {
-        console.log('managewalls');
-        if (this.hasWalls()) {
-            console.log('hasWalls');
-            this.addWalls();
-        }
-        else {
-            console.log('!hasWalls');
-            this.removeWalls();
-        }
-    }
-    /**
      * Disable game options
      */
     disableOptions() {
@@ -313,7 +274,6 @@ class Game {
                 this.start();
             }
             else if (el.id === 'cbx_walls') {
-                this.manageWalls();
             }
         });
     }
@@ -341,6 +301,20 @@ class Game {
             return this.over();
         }
         let direction = Directions.pop();
+        // Manage when the snake goes out of the map
+        if (direction === keys.RIGHT && this.head.x === GAME_WRAPPER_WIDTH - SIZE) {
+            this.head.x = 0;
+        }
+        if (direction === keys.LEFT && this.head.x === 0) {
+            this.head.x = GAME_WRAPPER_WIDTH;
+        }
+        if (direction === keys.UP && this.head.y === 0) {
+            this.head.y = GAME_WRAPPER_HEIGHT;
+        }
+        if (direction === keys.DOWN && this.head.y === GAME_WRAPPER_HEIGHT - SIZE) {
+            this.head.y = 0;
+        }
+        // Manage snake's movements
         if (direction === keys.RIGHT) {
             this.head.move(this.head.x + SIZE, this.head.y, keys[direction]);
         }
@@ -353,6 +327,7 @@ class Game {
         if (direction === keys.UP) {
             this.head.move(this.head.x, this.head.y - SIZE, keys[direction]);
         }
+        // Manage if snake eats food or not
         this.handleFood();
     }
     /**
