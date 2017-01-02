@@ -362,7 +362,7 @@ class Game {
 
         let direction = Directions.pop();
 
-        // Manage when the snake goes out of the map
+        // Manage when the snake goes out of the map 
          
         if (direction === keys.RIGHT && this.head.x === GAME_WRAPPER_WIDTH - SIZE) {
             this.head.x = 0;
