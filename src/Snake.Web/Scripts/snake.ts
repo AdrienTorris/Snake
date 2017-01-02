@@ -154,9 +154,6 @@ class Game {
         // Create the snake
         this.head = new Piece(this.gameWrapper, SIZE * 3, SIZE * 3, "head");
 
-        // Create map's walls
-        this.addWalls();
-
         // Create a food to feed the snake with
         this.handleFood();
 
@@ -166,9 +163,20 @@ class Game {
     }
 
     /**
-     * Add the walls the snake can't hurt
+     * Check if user asked for a game with or without walls
+     */
+    hasWalls(): boolean {
+        var cbx = <HTMLInputElement>document.getElementById('cbx_walls');
+        return cbx.checked;
+    }
+
+    /**
+     * Add the walls the snake can't hurt, if the user wants to
      */
     addWalls(): void {
+        if (!this.hasWalls()) {
+            return;
+        }
         // left
         for (var _i = 0; _i < GAME_WRAPPER_HEIGHT; _i++) {
             let mur: Piece = new Piece(this.gameWrapper, 0, _i, 'wall');
@@ -192,9 +200,62 @@ class Game {
     }
 
     /**
+     * Remove walls of the map if user wants to
+     */
+    removeWalls(): void {
+        // left
+        for (var _i = 0; _i < GAME_WRAPPER_HEIGHT; _i++) {
+            Locations.remove(0, _i);
+            _i = _i + SIZE - 1;
+        }
+        // right
+        for (var _i = 0; _i < GAME_WRAPPER_HEIGHT; _i++) {
+            Locations.remove(GAME_WRAPPER_WIDTH - SIZE, _i);
+            _i = _i + SIZE - 1;
+        }
+        // top
+        for (var _i = SIZE; _i < GAME_WRAPPER_WIDTH - SIZE; _i++) {
+            Locations.remove(_i,0);
+            _i = _i + SIZE - 1;
+        }
+        // bottom
+        for (var _i = SIZE; _i < GAME_WRAPPER_WIDTH - SIZE; _i++) {
+            Locations.remove(_i, GAME_WRAPPER_HEIGHT - SIZE);
+            _i = _i + SIZE - 1;
+        }
+    }
+
+    /**
+     * Display or hide walls
+     */
+    manageWalls(): void {
+        console.log('managewalls');
+        if (this.hasWalls()) {
+            console.log('hasWalls');
+            this.addWalls();
+        } else {
+            console.log('!hasWalls');
+            this.removeWalls();
+        }
+    }
+
+    /**
+     * Disable game options
+     */
+    disableOptions(): void {
+        var walls = <HTMLInputElement>document.getElementById('cbx_walls');
+        walls.disabled = true;
+    }
+
+    /**
      * Start a game
      */
     start(): void {
+        this.disableOptions();
+
+        // Create map's walls
+        this.addWalls();
+
         this.showScore();
         this.moving = true;
         requestAnimationFrame(this.frame.bind(this));
@@ -214,10 +275,10 @@ class Game {
      * Calculate the score and the level
      */
     updateScore(): number {
-        if (this.score.toString().endsWith('0')){
+        if (this.score.toString().endsWith('0')) {
             this.level += 1;
         }
-        
+
         return this.score += 1;
     }
 
@@ -227,7 +288,7 @@ class Game {
     getFoodLocation(): number[] {
         // Generate random x and y positions
         let x = Utils.rand(GAME_WRAPPER_LEFT, GAME_WRAPPER_WIDTH, SIZE);
-        let y = Utils.rand(GAME_WRAPPER_TOP, GAME_WRAPPER_HEIGHT, SIZE);
+        let y = Utils.rand(GAME_WRAPPER_TOP - SIZE, GAME_WRAPPER_HEIGHT, SIZE);
 
         // If random spot is already filled, pick a new one to avoid conflicts
         if (Locations.has(x, y)) {
@@ -287,7 +348,10 @@ class Game {
      */
     setEvents(): void {
 
-        document.addEventListener("keydown", (e: KeyboardEvent) => {
+        /**
+        * When the user enter any keyword key
+        */
+        document.addEventListener('keydown', (e: KeyboardEvent) => {
             switch (e.keyCode) {
                 default:
                     if (e.keyCode in keys && this.notBackwards(e.keyCode)) {
@@ -298,12 +362,14 @@ class Game {
         });
 
         /**
-        * User clicked on the start game button
+        * When the user click somewhere with the mouse 
         */
-        document.addEventListener("click", (e: MouseEvent) => {
+        document.addEventListener('click', (e: MouseEvent) => {
             let el = <HTMLElement>e.target;
-            if (el.id === "start") {
+            if (el.id === 'start') {
                 this.start();
+            } else if (el.id === 'cbx_walls') {
+                this.manageWalls();
             }
         });
     }
@@ -313,7 +379,7 @@ class Game {
      */
     over(): void {
         this.moving = false;
-        let el = <HTMLDivElement>document.querySelector(".score");
+        let el = <HTMLDivElement>document.querySelector('.score');
         el.innerHTML = `
       Game over!
     `;
@@ -333,7 +399,7 @@ class Game {
         if (Locations.has(this.head.x, this.head.y)) {
             return this.over();
         }
-        
+
         let direction = Directions.pop();
 
         if (direction === keys.RIGHT) {
@@ -351,7 +417,7 @@ class Game {
         if (direction === keys.UP) {
             this.head.move(this.head.x, this.head.y - SIZE, keys[direction]);
         }
-        
+
         this.handleFood();
     }
 
@@ -406,7 +472,7 @@ namespace Locations {
 }
 
 /**
- * Game's item
+ * Game's item (all the game's items are pieces)
  */
 class Piece {
     el: HTMLDivElement;
@@ -438,9 +504,9 @@ class Piece {
     setPos(x: number, y: number): void {
         this.el.style.top = `${y}px`;
         this.el.style.left = `${x}px`;
-        
+
         this.applyClass();
-        
+
         if (this.type !== "head" && this.type !== "food") {
             Locations.set(x, y);
         }
@@ -450,7 +516,7 @@ class Piece {
         this.direction = direction;
 
         this.setPos(x, y);
-        
+
         let tdirection = this.direction;
         this.direction = direction;
         if (this.next !== null) {
@@ -458,15 +524,15 @@ class Piece {
         } else {
             Locations.remove(this.x, this.y);
         }
-        
+
         if (this.next === null && this.type === "body") {
             this.el.classList.add("tail");
         }
-        
+
         if (this.next !== null && this.next.x === x && this.next.y === y) {
             this.next.el.classList.add("gulp");
         }
-        
+
         this.x = x;
         this.y = y;
     }

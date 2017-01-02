@@ -37,10 +37,6 @@ var keys;
     keys[keys["UP"] = 38] = "UP";
     keys[keys["RIGHT"] = 39] = "RIGHT";
     keys[keys["DOWN"] = 40] = "DOWN";
-    keys[keys["C"] = 67] = "C";
-    keys[keys["G"] = 71] = "G";
-    keys[keys["J"] = 74] = "J";
-    keys[keys["K"] = 75] = "K";
 })(keys || (keys = {}));
 /**
  * Utility methods to help dealing with some stuff
@@ -126,17 +122,25 @@ class Game {
         this.gameWrapper.style.left = `${GAME_WRAPPER_LEFT}px`;
         // Create the snake
         this.head = new Piece(this.gameWrapper, SIZE * 3, SIZE * 3, "head");
-        // Create map's walls
-        this.addWalls();
         // Create a food to feed the snake with
         this.handleFood();
         // Events the game handles
         this.setEvents();
     }
     /**
-     * Add the walls the snake can't hurt
+     * Check if user asked for a game with or without walls
+     */
+    hasWalls() {
+        var cbx = document.getElementById('cbx_walls');
+        return cbx.checked;
+    }
+    /**
+     * Add the walls the snake can't hurt, if the user wants to
      */
     addWalls() {
+        if (!this.hasWalls()) {
+            return;
+        }
         // left
         for (var _i = 0; _i < GAME_WRAPPER_HEIGHT; _i++) {
             let mur = new Piece(this.gameWrapper, 0, _i, 'wall');
@@ -159,9 +163,58 @@ class Game {
         }
     }
     /**
+     * Remove walls of the map if user wants to
+     */
+    removeWalls() {
+        // left
+        for (var _i = 0; _i < GAME_WRAPPER_HEIGHT; _i++) {
+            Locations.remove(0, _i);
+            _i = _i + SIZE - 1;
+        }
+        // right
+        for (var _i = 0; _i < GAME_WRAPPER_HEIGHT; _i++) {
+            Locations.remove(GAME_WRAPPER_WIDTH - SIZE, _i);
+            _i = _i + SIZE - 1;
+        }
+        // top
+        for (var _i = SIZE; _i < GAME_WRAPPER_WIDTH - SIZE; _i++) {
+            Locations.remove(_i, 0);
+            _i = _i + SIZE - 1;
+        }
+        // bottom
+        for (var _i = SIZE; _i < GAME_WRAPPER_WIDTH - SIZE; _i++) {
+            Locations.remove(_i, GAME_WRAPPER_HEIGHT - SIZE);
+            _i = _i + SIZE - 1;
+        }
+    }
+    /**
+     * Display or hide walls
+     */
+    manageWalls() {
+        console.log('managewalls');
+        if (this.hasWalls()) {
+            console.log('hasWalls');
+            this.addWalls();
+        }
+        else {
+            console.log('!hasWalls');
+            this.removeWalls();
+        }
+    }
+    /**
+     * Disable game options
+     */
+    disableOptions() {
+        var walls = document.getElementById('cbx_walls');
+        walls.disabled = true;
+    }
+    /**
      * Start a game
      */
     start() {
+        this.disableOptions();
+        // Create map's walls
+        this.addWalls();
         this.showScore();
         this.moving = true;
         requestAnimationFrame(this.frame.bind(this));
@@ -190,7 +243,7 @@ class Game {
     getFoodLocation() {
         // Generate random x and y positions
         let x = Utils.rand(GAME_WRAPPER_LEFT, GAME_WRAPPER_WIDTH, SIZE);
-        let y = Utils.rand(GAME_WRAPPER_TOP, GAME_WRAPPER_HEIGHT, SIZE);
+        let y = Utils.rand(GAME_WRAPPER_TOP - SIZE, GAME_WRAPPER_HEIGHT, SIZE);
         // If random spot is already filled, pick a new one to avoid conflicts
         if (Locations.has(x, y)) {
             [x, y] = this.getFoodLocation();
@@ -239,7 +292,10 @@ class Game {
      * Set events the game handles
      */
     setEvents() {
-        document.addEventListener("keydown", (e) => {
+        /**
+        * When the user enter any keyword key
+        */
+        document.addEventListener('keydown', (e) => {
             switch (e.keyCode) {
                 default:
                     if (e.keyCode in keys && this.notBackwards(e.keyCode)) {
@@ -249,12 +305,15 @@ class Game {
             }
         });
         /**
-        * User clicked on the start game button
+        * When the user click somewhere with the mouse
         */
-        document.addEventListener("click", (e) => {
+        document.addEventListener('click', (e) => {
             let el = e.target;
-            if (el.id === "start") {
+            if (el.id === 'start') {
                 this.start();
+            }
+            else if (el.id === 'cbx_walls') {
+                this.manageWalls();
             }
         });
     }
@@ -263,7 +322,7 @@ class Game {
      */
     over() {
         this.moving = false;
-        let el = document.querySelector(".score");
+        let el = document.querySelector('.score');
         el.innerHTML = `
       Game over!
     `;
@@ -345,7 +404,7 @@ var Locations;
     Locations.has = has;
 })(Locations || (Locations = {}));
 /**
- * Game's item
+ * Game's item (all the game's items are pieces)
  */
 class Piece {
     constructor(gameWrapper, x, y, type = "body", direction = "RIGHT") {
