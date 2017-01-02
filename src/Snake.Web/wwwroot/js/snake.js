@@ -193,7 +193,7 @@ class Game {
      * Calculate the score and the level
      */
     updateScore() {
-        if (this.score.toString().endsWith('0')) {
+        if (this.score.toString().endsWith('0') && this.score > 0) {
             this.level += 1;
         }
         return this.score += 1;

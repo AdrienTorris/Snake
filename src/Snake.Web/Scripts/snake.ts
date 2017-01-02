@@ -235,7 +235,7 @@ class Game {
      * Calculate the score and the level
      */
     updateScore(): number {
-        if (this.score.toString().endsWith('0')) {
+        if (this.score.toString().endsWith('0') && this.score > 0) {
             this.level += 1;
         }
 
@@ -362,7 +362,7 @@ class Game {
 
         let direction = Directions.pop();
 
-        // Manage when the snake goes out of the map 
+        // Manage when the snake goes out of the map
          
         if (direction === keys.RIGHT && this.head.x === GAME_WRAPPER_WIDTH - SIZE) {
             this.head.x = 0;
