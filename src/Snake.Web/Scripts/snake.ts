@@ -61,13 +61,6 @@ namespace Utils {
         return num - (num % reduce);
     }
 
-    export function snap(num: number, point = SIZE): number {
-        let bottom = num - num % point;
-        let top = bottom + point;
-
-        return num - bottom <= top - num ? bottom : top;
-    }
-
 }
 
 namespace Directions {
@@ -329,7 +322,7 @@ class Game {
             if (el.id === 'start') {
                 this.start();
             } else if (el.id === 'cbx_walls') {
-               
+
             }
         });
     }
@@ -361,24 +354,6 @@ class Game {
         }
 
         let direction = Directions.pop();
-
-        // Manage when the snake goes out of the map
-         
-        if (direction === keys.RIGHT && this.head.x === GAME_WRAPPER_WIDTH - SIZE) {
-            this.head.x = 0;
-        }
-
-        if (direction === keys.LEFT && this.head.x === 0) {
-            this.head.x = GAME_WRAPPER_WIDTH;
-        }
-
-        if (direction === keys.UP && this.head.y === 0) {
-            this.head.y = GAME_WRAPPER_HEIGHT;
-        }
-
-        if (direction === keys.DOWN && this.head.y === GAME_WRAPPER_HEIGHT - SIZE) {
-            this.head.y = 0;
-        }
 
         // Manage snake's movements
 
@@ -456,9 +431,25 @@ namespace Locations {
  * Game's item (all the game's items are pieces)
  */
 class Piece {
+
+    /**
+    * Rendering element
+    */
     el: HTMLDivElement;
+
+    /**
+    * Next piece
+    */
     next: Piece;
 
+    /**
+     * Instanciate new piece
+     * @param gameWrapper
+     * @param x
+     * @param y
+     * @param type
+     * @param direction
+     */
     constructor(
         public gameWrapper: HTMLDivElement,
         public x: number,
@@ -488,12 +479,36 @@ class Piece {
 
         this.applyClass();
 
-        if (this.type !== "head" && this.type !== "food") {
+        if (this.type !== 'head' && this.type !== 'food') {
             Locations.set(x, y);
         }
     }
 
-    move(x: number, y: number, direction: string = "RIGHT"): void {
+    /**
+     * Handle the piece's movement
+     * @param x
+     * @param y
+     * @param direction
+     */
+    move(x: number, y: number, direction: string = 'RIGHT'): void {
+
+        // Manage when the snake crosses the right wall
+        if (direction === 'RIGHT' && x === GAME_WRAPPER_WIDTH) {
+            x = 0;
+        }
+        // Manage when the snake crosses the left wall
+        if (direction === 'LEFT' && x === SIZE * -1) {
+            x = GAME_WRAPPER_WIDTH - SIZE;
+        }
+        // Manage when the snake crosses the top wall
+        if (direction === 'UP' && y === SIZE * -1) {
+            y = GAME_WRAPPER_HEIGHT - SIZE;
+        }
+        // Manage when the snake crosses the bottom wall
+        if (direction === 'DOWN' && y === GAME_WRAPPER_HEIGHT) {
+            y = 0;
+        }
+
         this.direction = direction;
 
         this.setPos(x, y);
